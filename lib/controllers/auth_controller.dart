@@ -1,46 +1,52 @@
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
-import '../models/user.dart';
+import '../models/user_model.dart';
+import '../routes/app_routes.dart';
+import '../utils/screen_util.dart';
 import 'pref_controller.dart';
 
 class AuthController extends GetxController {
   static AuthController instance = Get.find();
-  var authenticated = false.obs;
+  var user = Rxn<UserModel>();
 
-  AuthController() {
-    // authenticated(pref.hasLoggedUser());
-  }
-
-  Future<void> autoLogin() async {
-    debugPrint('autoLogin => ${authenticated.value}');
-    if (PrefController.instance.hasLoggedUser()) {
-      User? _user = PrefController.instance.getLoggedUser();
-
-      // login(pref.getServerChoice(), _user!.userId!, _user.userPwd!,
-      //     _user.rememberMe!);
-    }
+  @override
+  void onInit() {
+    super.onInit();
+    // user = Rx<User?>(FirebaseAuth.instance.currentUser);
+    // user.bindStream(FirebaseAuth.instance.userChanges());
+    // user.value = FirebaseAuth.instance.currentUser?.toUserModel();
+    ever<UserModel?>(user, (_) {
+      print('ever-> $_');
+      if (_ == null) {
+        Get.offAllNamed(Routes.LOGIN);
+      } else {
+        Get.offAllNamed(Routes.HOME);
+      }
+    });
   }
 
   /// tidak mengatur reroute disini, hanya authentication secara online.
   ///
   /// login offline tidak diperlukan diatur di class ini karena sudah diatur di LoginController.
-  Future<User?> login(String userId, String pwd, bool rememberMe) async {
-    // var resp = await Api.instance.login(userId, pwd);
-    var resp = User(userId: userId, userPassword: pwd);
-    resp.rememberMe = rememberMe;
-    // inject password, because server might hide it
-    resp.userPassword = pwd;
-    authenticated(true);
-    return resp;
+  Future<UserModel?> loginWithEmail(String userId, String pwd, bool rememberMe) async {
+    var userModel = UserModel(userId: userId, userPassword: pwd);
+    userModel.rememberMe = rememberMe;
+    // Optional inject password, because server might hide it
+    userModel.userPassword = pwd;
+    PrefController.instance.setLoggedUser(userModel);
+    user.value = userModel;
+    return userModel;
   }
 
   /// must be called before route to login
   logout() async {
-    if (PrefController.instance.hasLoggedUser()) {
-      var user = PrefController.instance.getLoggedUser();
-      if (!user!.rememberMe!) await PrefController.instance.cleanLoggedUserData();
+    try {
+      if (PrefController.instance.hasLoggedUser()) {
+        var user = PrefController.instance.getLoggedUser();
+        if (user!.rememberMe != true) await PrefController.instance.cleanLoggedUserData();
+      }
+      user.value = null;
+    } catch (e, s) {
+      ScreenUtil.showError(e, stacktrace: s);
     }
-    authenticated(false);
   }
 }

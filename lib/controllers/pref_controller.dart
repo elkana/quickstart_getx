@@ -1,7 +1,7 @@
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 
-import '../models/user.dart';
+import '../models/user_model.dart';
 
 class PrefController extends GetxController {
   static PrefController instance = Get.find();
@@ -20,14 +20,15 @@ class PrefController extends GetxController {
   bool hasDarkTheme() => box.hasData('theme.dark');
 
 // sets...
-  Future<void> setLoggedUser(User? model) => model == null ? cleanLoggedUserData() : box.write('auth', model.toJson());
+  Future<void> setLoggedUser(UserModel? model) =>
+      model == null ? cleanLoggedUserData() : box.write('auth', model.toJson());
   Future<void> setDarkTheme(bool value) => box.write('theme.dark', value);
 
 // gets...
-  User? getLoggedUser() {
+  UserModel? getLoggedUser() {
     if (!hasLoggedUser()) return null;
     final map = box.read('auth') ?? {};
-    return User.fromJson(map);
+    return UserModel.fromJson(map);
   }
 
   bool getDarkTheme() => box.read('theme.dark') ?? false;

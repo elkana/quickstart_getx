@@ -1,31 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:quickstart_getx/routes/app_routes.dart';
-
 import '../controllers/auth_controller.dart';
 import '../controllers/pref_controller.dart';
-import '../models/user.dart';
+import '../models/user_model.dart';
 import '../utils/screen_util.dart';
 
 class LoginController extends GetxController {
+  static LoginController instance = Get.find();
   final formKey = GlobalKey<FormState>();
-  late TextEditingController ctrlUserId, ctrlPwd;
+  final ctrlUserId = TextEditingController();
+  final ctrlPwd = TextEditingController();
   var obscurePwd = true.obs;
   var rememberPwd = false.obs;
   var loading = false.obs;
 
   @override
-  void onInit() {
-    super.onInit();
-    ctrlUserId = TextEditingController();
-    ctrlPwd = TextEditingController();
-  }
-
-  @override
-  void onClose() {
-    ctrlPwd.dispose();
-    ctrlUserId.dispose();
-    super.onClose();
+  void onReady() {
+    super.onReady();
+    if (PrefController.instance.getLoggedUser() != null) {
+      ctrlUserId.text = PrefController.instance.getLoggedUser()!.userId ?? '';
+      ctrlPwd.text = PrefController.instance.getLoggedUser()!.userPassword ?? '';
+      rememberPwd(true);
+    }
   }
 
   String? validateUserId(String value) {
@@ -41,31 +37,25 @@ class LoginController extends GetxController {
     return null;
   }
 
-  Future<void> login() async {
+  Future<void> doLoginWithEmail() async {
     final form = formKey.currentState;
     if (form == null || !form.validate()) return;
     form.save();
 
     loading(true);
     try {
-      User? user = await AuthController.instance
-          .login(ctrlUserId.text, ctrlPwd.text, rememberPwd.value)
+      UserModel? user = await AuthController.instance
+          .loginWithEmail(ctrlUserId.text, ctrlPwd.text, rememberPwd.value)
           .onError((error, stackTrace) {
         ScreenUtil.showToast(error.toString(), error: true, title: 'Login Failed');
         return null;
       });
 
       if (user == null) return;
-      await PrefController.instance.setLoggedUser(user);
-
-      await 1.delay();
-      gotoHome();
+    } catch (e, s) {
+      ScreenUtil.showError(e, stacktrace: s);
     } finally {
       loading(false);
     }
-  }
-
-  gotoHome() {
-    Get.offAllNamed(Routes.HOME);
   }
 }

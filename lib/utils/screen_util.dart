@@ -32,5 +32,9 @@ class ScreenUtil {
                   ])) ??
       false;
 
-  static Future<bool> exitApp() => confirm('Keluar dari Aplikasi ?');
+  static Future<bool> exitApp() async {
+    var ret = await Get.defaultDialog<bool>(
+        onConfirm: () => Get.back(result: true), onCancel: () {}, middleText: 'Keluar dari Aplikasi ?');
+    return ret == true;
+  }
 }
