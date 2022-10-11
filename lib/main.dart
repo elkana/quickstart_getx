@@ -26,7 +26,7 @@ class MyApp extends StatelessWidget {
           onInit: () async {
             await Get.put(PrefController()).initStorage();
           },
-          themeMode: ThemeMode.dark,
+          theme: ThemeData.dark(),
           locale: const Locale('en', 'US'),
           translationsKeys: AppTranslation.translations,
           getPages: [
