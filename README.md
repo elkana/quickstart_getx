@@ -5,6 +5,8 @@ Do not use Bloc or any reactive different than GetX.
 
 ```
 $ flutter create quickstart_getx
+
+$ flutter build apk --release
 ```
 
 ## Getting Started
