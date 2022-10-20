@@ -9,6 +9,7 @@ import 'login/login_view.dart';
 import 'login/reset_pwd/resetpwd_view.dart';
 import 'login/signup/signup_view.dart';
 import 'routes/app_routes.dart';
+import 'providers/api.dart';
 
 void main() {
   runApp(const MyApp());
@@ -21,6 +22,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) => GetMaterialApp(
           home: const SplashView(),
           initialBinding: BindingsBuilder(() {
+            Get.put(Api());
             Get.put(AuthController(), permanent: true);
           }),
           onInit: () async {
