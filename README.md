@@ -4,8 +4,7 @@ This quick start using GetX framework.
 Do not use Bloc or any reactive different than GetX.
 
 ```
-$ flutter create quickstart_getx
-
+$ flutter create --org com.yourpackage -a java quickstart_getx
 $ flutter build apk --release
 ```
 
