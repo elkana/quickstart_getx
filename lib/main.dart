@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 
 import 'configs/locales.dart';
 import 'controllers/auth_controller.dart';
@@ -9,7 +10,6 @@ import 'login/login_view.dart';
 import 'login/reset_pwd/resetpwd_view.dart';
 import 'login/signup/signup_view.dart';
 import 'routes/app_routes.dart';
-import 'providers/api.dart';
 
 void main() {
   runApp(const MyApp());
@@ -22,11 +22,12 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) => GetMaterialApp(
           home: const SplashView(),
           initialBinding: BindingsBuilder(() {
-            Get.put(Api());
-            Get.put(AuthController(), permanent: true);
+            // Get.put(Api());
+            Get.lazyPut<AuthController>(() => AuthController());
+            Get.lazyPut<PrefController>(() => PrefController());
           }),
           onInit: () async {
-            await Get.put(PrefController()).initStorage();
+            await GetStorage.init();
           },
           theme: ThemeData.dark(),
           locale: const Locale('en', 'US'),
